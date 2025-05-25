@@ -1,0 +1,82 @@
+
+name: Deploy Professional Portfolio
+
+on:
+  repository_dispatch:
+    types: [deploy-portfolio]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout source repository (dave-ops)
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run portfolio customization
+      run: node scripts/customize-portfolio.js
+      
+    - name: Build project
+      run: npm run build
+      
+    - name: Deploy to destination repository
+      run: |
+        git config --global user.name 'Portfolio Deploy Bot'
+        git config --global user.email 'deploy@dave-ops.net'
+        
+        # Clone the destination repo
+        git clone https://x-access-token:${{ secrets.PORTFOLIO_TOKEN }}@github.com/dmaru09sub/dave-ops-portfolio.git destination
+        
+        # Remove existing content except .git and .github
+        cd destination
+        find . -maxdepth 1 ! -name '.git' ! -name '.github' ! -name '.' ! -name '..' -exec rm -rf {} +
+        
+        # Copy source files to destination (excluding .git and destination folder)
+        cd ..
+        rsync -av --exclude='.git' --exclude='destination' --exclude='node_modules' . destination/
+        
+        # Copy built files to root if they exist
+        if [ -d "dist" ]; then
+          cp -r dist/* destination/ 2>/dev/null || true
+        fi
+        
+        # Go to destination and commit changes
+        cd destination
+        git add .
+        git commit -m "Deploy portfolio - $(date)" || echo "No changes to commit"
+        git push origin main
+        
+    - name: Update deployment status - Success
+      if: success()
+      run: |
+        curl -X POST 'https://nlzwrlgtjshcjfxfchyz.supabase.co/functions/v1/update-deployment-status' \
+          -H 'Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}' \
+          -H 'Content-Type: application/json' \
+          -d '{
+            "deployment_id": "${{ github.event.client_payload.deployment_id }}",
+            "status": "deployed",
+            "deployment_url": "https://dmaru09sub.github.io/dave-ops-portfolio"
+          }'
+          
+    - name: Update deployment status - Failure
+      if: failure()
+      run: |
+        curl -X POST 'https://nlzwrlgtjshcjfxfchyz.supabase.co/functions/v1/update-deployment-status' \
+          -H 'Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}' \
+          -H 'Content-Type: application/json' \
+          -d '{
+            "deployment_id": "${{ github.event.client_payload.deployment_id }}",
+            "status": "failed",
+            "notes": "GitHub Actions deployment failed - check workflow logs"
+          }'
