@@ -4,18 +4,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dave-Ops.Net - DevOps Portfolio</title>
+    <title>Professional Web Application</title>
     <meta name="description" content="Dave-Ops.Net - Your friendly neighborhood DevOps engineer" />
     <meta name="author" content="Dave Marusiak" />
 
     <meta property="og:title" content="Dave-Ops.Net" />
     <meta property="og:description" content="DevOps Portfolio and Tutorials" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    
 
     <!-- Start Single Page Apps for GitHub Pages -->
     <script type="text/javascript">
@@ -34,20 +34,24 @@
           var decoded = l.search.slice(1).split('&').map(function(s) { 
             return s.replace(/~and~/g, '&')
           }).join('?');
+          
+          // Handle custom domain vs GitHub Pages subdirectory
+          var isCustomDomain = l.hostname === 'dave-ops.net' || l.hostname === 'www.dave-ops.net';
+          var pathPrefix = isCustomDomain ? '' : l.pathname.slice(0, -1);
+          
           window.history.replaceState(null, null,
-              l.pathname.slice(0, -1) + decoded + l.hash
+              pathPrefix + decoded + l.hash
           );
         }
       }(window.location))
     </script>
     <!-- End Single Page Apps for GitHub Pages -->
-    <script type="module" crossorigin src="/dave-ops-portfolio/assets/index-DA6AIRqx.js"></script>
-    <link rel="stylesheet" crossorigin href="/dave-ops-portfolio/assets/index-Co1x7oQ7.css">
+    <script type="module" crossorigin src="/assets/index-D-h4rdUZ.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CwuNS27H.css">
   </head>
 
   <body>
     <div id="root"></div>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
   </body>
 </html>
